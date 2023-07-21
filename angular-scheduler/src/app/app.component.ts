@@ -8,6 +8,7 @@ import {
 } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { IEvent } from './interfaces';
 
 @Component({
   selector: 'app-root',
@@ -16,10 +17,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 })
 export class AppComponent {
   @ViewChild('calendar') calendar: FullCalendarComponent;
-  scheduleEvents = [
-    { title: 'event 1', date: '2023-07-27' },
-    { title: 'event 2', date: '2023-07-21' },
-  ];
+  scheduleEvents: IEvent[] = localStorage.getItem('scheduleEvents')
+    ? JSON.parse(localStorage.getItem('scheduleEvents')!)
+    : [{ title: 'тестовое мероприятие', date: '2023-07-24' }];
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
     weekends: true,
@@ -50,10 +50,16 @@ export class AppComponent {
     const calendarApi = selectInfo.view.calendar;
     calendarApi.unselect();
     if (title) {
-      calendarApi.addEvent({
+      const event: IEvent = {
         title,
         date: selectInfo.startStr,
-      });
+      };
+      calendarApi.addEvent(event);
+      this.scheduleEvents.push(event);
+      localStorage.setItem(
+        'scheduleEvents',
+        JSON.stringify(this.scheduleEvents)
+      );
     }
   }
   handleEventClick(clickInfo: EventClickArg) {
@@ -61,7 +67,7 @@ export class AppComponent {
     const date = clickInfo.event.start;
     let calendarApi = this.calendar.getApi();
     if (title) {
-      const event = {
+      const event: IEvent = {
         title: title,
         date: `${date?.getFullYear()}-${String(date!.getMonth() + 1).padStart(
           2,
@@ -70,21 +76,25 @@ export class AppComponent {
       };
       this.scheduleEvents.push(event);
       this.scheduleEvents = this.scheduleEvents.filter(
-        (item) => item.title !== clickInfo.event.title
+        (item: IEvent) => item.title !== clickInfo.event.title
       );
       calendarApi.addEvent(event);
       clickInfo.event.remove();
       console.log(this.scheduleEvents);
+      localStorage.setItem(
+        'scheduleEvents',
+        JSON.stringify(this.scheduleEvents)
+      );
     }
   }
   handleEventDrop(dropInfo: EventDropArg) {
     this.scheduleEvents = this.scheduleEvents.filter(
-      (item) => item.title !== dropInfo.event.title
+      (item: IEvent) => item.title !== dropInfo.event.title
     );
     let calendarApi = this.calendar.getApi();
     const title = dropInfo.event.title;
     const date = dropInfo.event.start;
-    const event = {
+    const event: IEvent = {
       title: title,
       date: `${date?.getFullYear()}-${String(date!.getMonth() + 1).padStart(
         2,
@@ -95,5 +105,6 @@ export class AppComponent {
     this.scheduleEvents.push(event);
     calendarApi.addEvent(event);
     console.log('date changed');
+    localStorage.setItem('scheduleEvents', JSON.stringify(this.scheduleEvents));
   }
 }
