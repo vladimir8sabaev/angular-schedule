@@ -7,22 +7,67 @@ import {
   EventDropArg,
   EventMountArg,
 } from '@fullcalendar/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { IEvent } from './interfaces';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  constructor(private fb: FormBuilder) {}
+  eventForm!: FormGroup<{
+    title: FormControl<string>;
+    date: FormControl<string>;
+  }>;
+  initForm() {
+    this.eventForm = this.fb.nonNullable.group({
+      title: ['', [Validators.required]],
+      date: ['', [Validators.required]],
+    });
+  }
+  saveEvent() {
+    if (this.eventForm.value.title && this.eventForm.value.date) {
+      this.scheduleEvents.push({
+        title: this.eventForm.value.title,
+        date: this.eventForm.value.date,
+      });
+      localStorage.setItem(
+        'scheduleEvents',
+        JSON.stringify(this.scheduleEvents)
+      );
+      let calendarApi = this.calendar.getApi();
+      calendarApi.addEvent({
+        title: this.eventForm.value.title,
+        date: this.eventForm.value.date,
+      });
+    }
+  }
+  isAdd: Boolean = false;
   @ViewChild('calendar') calendar: FullCalendarComponent;
   scheduleEvents: IEvent[] = localStorage.getItem('scheduleEvents')
     ? JSON.parse(localStorage.getItem('scheduleEvents')!)
     : [{ title: 'тестовое мероприятие', date: '2023-07-24' }];
   calendarOptions: CalendarOptions = {
+    customButtons: {
+      myCustomButton: {
+        text: 'Добавить событие',
+        click: () => {
+          this.isAdd = true;
+          console.log(this.isAdd);
+        },
+      },
+    },
     initialView: 'dayGridMonth',
     weekends: true,
     firstDay: 1,
@@ -37,7 +82,7 @@ export class AppComponent {
     defaultAllDayEventDuration: { days: 1 },
     headerToolbar: {
       left: 'prev title next today',
-      center: '',
+      center: 'myCustomButton',
       right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
     },
     events: this.scheduleEvents,
@@ -129,5 +174,8 @@ export class AppComponent {
     calendarApi.addEvent(event);
     console.log('date changed');
     localStorage.setItem('scheduleEvents', JSON.stringify(this.scheduleEvents));
+  }
+  ngOnInit() {
+    this.initForm();
   }
 }
