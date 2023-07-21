@@ -26,6 +26,7 @@ import listPlugin from '@fullcalendar/list';
 })
 export class AppComponent {
   constructor(private fb: FormBuilder) {}
+  howTo: Boolean = Boolean(localStorage.getItem('howTo'));
   eventForm!: FormGroup<{
     title: FormControl<string>;
     date: FormControl<string>;
@@ -52,6 +53,8 @@ export class AppComponent {
         date: this.eventForm.value.date,
       });
     }
+    this.isAdd = false;
+    alert('Событие успешно добавлено!');
   }
   isAdd: Boolean = false;
   @ViewChild('calendar') calendar: FullCalendarComponent;
@@ -174,6 +177,10 @@ export class AppComponent {
     calendarApi.addEvent(event);
     console.log('date changed');
     localStorage.setItem('scheduleEvents', JSON.stringify(this.scheduleEvents));
+  }
+  goToMain() {
+    this.howTo = true;
+    localStorage.setItem('howTo', 'true');
   }
   ngOnInit() {
     this.initForm();
