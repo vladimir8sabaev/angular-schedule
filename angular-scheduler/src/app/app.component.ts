@@ -5,11 +5,13 @@ import {
   DateSelectArg,
   EventClickArg,
   EventDropArg,
+  EventMountArg,
 } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { IEvent } from './interfaces';
-
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -25,7 +27,7 @@ export class AppComponent {
     weekends: true,
     firstDay: 1,
     locale: 'ru',
-    plugins: [dayGridPlugin, interactionPlugin],
+    plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin],
     eventStartEditable: true,
     selectable: true,
     select: this.handleDateSelect.bind(this),
@@ -34,17 +36,38 @@ export class AppComponent {
     defaultAllDay: true,
     defaultAllDayEventDuration: { days: 1 },
     headerToolbar: {
-      left: 'prev',
-      center: 'title',
-      right: 'next today',
+      left: 'prev title next today',
+      center: '',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
     },
     events: this.scheduleEvents,
     buttonText: {
       today: 'Сегодня',
+      month: 'Месяц',
+      week: 'Неделя',
+      day: 'День',
+      list: 'Список',
     },
     eventClick: this.handleEventClick.bind(this),
     eventDrop: this.handleEventDrop.bind(this),
+    eventDidMount: this.handleDeleteEvent.bind(this),
   };
+
+  handleDeleteEvent(arg: EventMountArg) {
+    arg.el.addEventListener('contextmenu', (jsEvent) => {
+      jsEvent.preventDefault();
+      if (confirm('Хотите удалить событие?')) {
+        arg.event.remove();
+        this.scheduleEvents = this.scheduleEvents.filter(
+          (item: IEvent) => item.title !== arg.event.title
+        );
+        localStorage.setItem(
+          'scheduleEvents',
+          JSON.stringify(this.scheduleEvents)
+        );
+      }
+    });
+  }
   handleDateSelect(selectInfo: DateSelectArg) {
     const title = prompt('Введите название нового события');
     const calendarApi = selectInfo.view.calendar;

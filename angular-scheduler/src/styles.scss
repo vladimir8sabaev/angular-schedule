@@ -1,3 +1,6 @@
+body {
+  padding: 20px 20px;
+}
 .fc .fc-daygrid-day-top {
   flex-direction: row;
 }
@@ -9,4 +12,19 @@
 }
 .fc .fc-col-header-cell-cushion {
   text-transform: capitalize;
+}
+.fc-daygrid-day-number {
+  color: grey;
+  text-decoration: none;
+}
+.fc-day-today {
+  background: #cccccc !important;
+  border: none !important;
+}
+.fc-col-header-cell-cushion {
+  color: grey;
+  text-decoration: none;
+}
+.fc-toolbar-chunk {
+  display: flex;
 }
