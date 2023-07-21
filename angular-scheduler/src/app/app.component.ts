@@ -1,5 +1,10 @@
-import { Component } from '@angular/core';
-import { CalendarOptions, DateSelectArg } from '@fullcalendar/core';
+import { Component, ViewChild } from '@angular/core';
+import { FullCalendarComponent } from '@fullcalendar/angular';
+import {
+  CalendarOptions,
+  DateSelectArg,
+  EventClickArg,
+} from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
@@ -9,10 +14,7 @@ import interactionPlugin from '@fullcalendar/interaction';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  eventGuid: number = 0;
-  createEventId() {
-    return String(this.eventGuid++);
-  }
+  @ViewChild('calendar') calendar: FullCalendarComponent;
   scheduleEvents = [
     { title: 'event 1', date: '2023-07-27' },
     { title: 'event 2', date: '2023-07-21' },
@@ -36,6 +38,10 @@ export class AppComponent {
       right: 'next today',
     },
     events: this.scheduleEvents,
+    buttonText: {
+      today: 'Сегодня',
+    },
+    eventClick: this.handleEventClick.bind(this),
   };
   handleDateSelect(selectInfo: DateSelectArg) {
     const title = prompt('Please enter a new title for your event');
@@ -43,12 +49,27 @@ export class AppComponent {
     calendarApi.unselect();
     if (title) {
       calendarApi.addEvent({
-        id: this.createEventId(),
         title,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         allDay: selectInfo.allDay,
       });
+    }
+  }
+  handleEventClick(clickInfo: EventClickArg) {
+    const title = prompt('Enter new title:');
+    const date = clickInfo.event.start;
+    let calendarApi = this.calendar.getApi();
+    if (title) {
+      const event = {
+        title: title,
+        date: `${date?.getFullYear()}-${String(date!.getMonth() + 1).padStart(
+          2,
+          '0'
+        )}-${String(date!.getDate()).padStart(2, '0')}`,
+      };
+      this.scheduleEvents.push(event);
+      calendarApi.addEvent(event);
     }
   }
 }
