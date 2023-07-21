@@ -1,1 +1,50 @@
-<full-calendar [options]="calendarOptions"></full-calendar>
+<div *ngIf="!howTo" class="container">
+  <h1>Инструкция по использованию приложения</h1>
+  <p>0. Описание возможностей приложения: Добавление, редактирование, удаление событий; переключение месяца; добавление
+    событий с помощью реактивной формы, автоматическая валидация формы; переключение представления событий; сохранение
+    списка событий в localStorage </p>
+  <p>1. Чтобы добавить событие, необходимо нажать на любую ячейку левой кнопкой мыши и заполнить название во всплывающем
+    окне либо нажать на кнопку "Добавить событие",
+    которая откроет форму в нижней части экрана</p>
+  <p>2. Для удаления события необходимо нажать на само событие ПРАВОЙ кнопкой мыши и подтвердить удаление во всплывающем
+    окне</p>
+  <p>
+    3. Для изменения даты события его можно перетащить на любую ячейку c зажатой левой кнопкой мыши
+  </p>
+  <p>
+    4. Кнопки в верхней правой части отвечают за переключение представления событий (отображение месяца, недели, дня или
+    всех событий за неделю одним списком)
+  </p>
+  <p>5. Кнопка "Сегодня" возвращает на текущий временной интервал (месяц, неделя, день)</p>
+  <p>6. Для повторного появления данной инструкции необходимо удалить переменную "howTo" из localStorage </p>
+  <button class="meetup__form__submit" (click)="goToMain()">Все понятно</button>
+</div>
+<div *ngIf="howTo">
+  <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+  <form *ngIf="isAdd" class="event__form" [formGroup]="eventForm">
+    <div class="input__wrapper">
+      <div class="label__wrapper">
+        <label for="name">Название события</label>
+      </div>
+      <input class="event__input" type="text" formControlName="title" id="title">
+    </div>
+    <span class="meetup__error" *ngIf="!eventForm.get('title')?.valid && eventForm.get('title')?.touched">Введите
+      название
+      встречи!</span>
+    <div class="input__wrapper">
+      <div class="label__wrapper">
+        <label for="date">Date:</label>
+      </div>
+      <input class="event__input" type="date" value="2023-07-25" formControlName="date" id="date">
+    </div>
+    <span class="meetup__error" *ngIf="!eventForm.get('date')?.valid && eventForm.get('date')?.touched">Введите
+      дату!</span>
+
+    <button class="meetup__form__submit" disabled
+      *ngIf="!eventForm.get('date')?.valid || !eventForm.get('title')?.valid" type="submit">Добавить событие</button>
+    <button class="meetup__form__submit" (click)="saveEvent()"
+      *ngIf="eventForm.get('date')?.valid && eventForm.get('title')?.valid" type="submit">
+      Добавить событие
+    </button>
+  </form>
+</div>
